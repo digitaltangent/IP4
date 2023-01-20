@@ -1,0 +1,107 @@
+IP4
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: client-1-rs
+  labels:
+    app: client-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-1
+  template:
+    metadata:
+      labels:
+        app: client-1
+    spec:
+      containers:
+      - name: client-1
+        image: aleedaf/yolo:client-1.1.0
+        ports:
+        - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-1-svc
+spec:
+  selector:
+    app: client-1
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: backend-1-rs
+  labels:
+    app: backend-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-1
+  template:
+    metadata:
+      labels:
+        app: backend-1
+    spec:
+      containers:
+      - name: backend-1
+        image: aleedaf/yolo:backend-1.1.0
+        ports:
+        - containerPort: 3001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-1-svc
+spec:
+  selector:
+    app: backend-1
+  ports:
+  - name: http
+    port: 3001
+    targetPort: 3001
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  serviceName: mongodb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
