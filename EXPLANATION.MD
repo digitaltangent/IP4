@@ -13,3 +13,6 @@ In order to be able to access my pods from an external IP, I used a Service in m
 
 # Persistent Storage
 Because we used a StatefulSet in the mongodb container, our data will not be deleted when the pods fail or are destroyed. A StatefulSet provides persistent storage by automatically creating and managing Persistent Volume Claims (PVCs) for the pods that it manages. When you create a StatefulSet, it creates a PVC for each replica of the pod that it manages. These PVCs are automatically bound to Persistent Volumes (PVs) that provide storage for the pod's data. When a pod is deleted or rescheduled, the StatefulSet ensures that the pod's PVC and PV are not deleted, this way the data remains intact and can be mounted to a new pod.
+
+# Attempts to debug
+Due to using the MAC Arm processor, my images were not quite working in the cloud as they were on my machine. To fix this, I researched different solutions and eventually added a line to my Dockerfile to specify the platform that the image should run on. I also had quite a few issues with the connection to mongo in the cloud. I used the kubectl logs <podname> to help me identify where things were going on and based on this I was able to sort out a few issues including the env variable for the connection string to the database
